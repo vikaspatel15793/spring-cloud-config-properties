@@ -1,0 +1,67 @@
+eureka:
+  client:
+#    enabled: true
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:8082/eureka
+  instance:
+    preferIpAddress: true
+    
+spring:
+  application:
+    name: api-gateway
+  cloud:
+   gateway:
+      discovery:
+        locator:
+          enabled: true
+          lowerCaseServiceId: true
+      routes:
+      - id: rating-service
+        uri: lb://rating-service
+        predicates:
+        - Path=/api/ratings/**
+        filters:
+        - StripPrefix=1
+#        - RewritePath=/api/(?<ratings>.*), /$\{ratings}
+#        - AddRequestHeader=X-first-Header, first-service-header
+#        - name: Hystrix
+#          args:
+#            name: ratingsFallbackCommand
+#            fallbackUri: forward:/fallback/ratings
+      - id: book-service
+        uri: lb://book-service
+        predicates:
+        - Path=/api/books/**
+        filters:
+        - StripPrefix=1
+      loadbalancer:
+       use404: true             
+           
+
+server:
+  port: 8080
+
+
+    
+    
+logging:
+  level:
+    reactor:
+      netty: INFO
+    org:
+      springframework:
+        cloud:
+          gateway: TRACE
+    
+
+
+
+#
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: hystrix.stream
+
